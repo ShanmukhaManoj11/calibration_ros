@@ -1,0 +1,19 @@
+<launch>
+	<node pkg="nodelet" type="nodelet" name="standalone_nodelet" args="manager"/>
+
+	<node name="rosbag_player" pkg="rosbag" type="play" args="/home/mano/data/2016-11-22-14-32-13_test_modified.bag" required="true"/>
+
+	<node name="rectifyer" pkg="nodelet" type="nodelet" args="load image_proc/rectify standalone_nodelet" required="true">
+		<remap from="image_mono" to="sensors/camera/image_color"/>
+		<remap from="camera_info" to="/sensors/camera/camera_info"/>
+		<remap from="image_rect" to="/sensors/camera/image_rect_color"/>
+	</node>
+
+	<node name="static_transform_publisher" pkg="tf" type="static_transform_publisher" args="-0.269326290 -0.450351774 -0.219415375 1.62507734 4.87444952 0.0 world velodyne 100" required="true"/>
+
+	<node name="image_pointcloud_overlay" pkg="camera_lidar_calibration" type="camera_lidar_overlay"/>
+
+	<node name="video_recorder" pkg="image_view" type="video_recorder" respawn="false">
+		<remap from="image" to="/sensors/camera/overlayed_lidar_image"/>
+	</node>
+</launch>

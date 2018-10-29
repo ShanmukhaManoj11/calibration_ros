@@ -1,0 +1,12 @@
+<launch>
+	<node 
+		name="calibrator" 
+		pkg="camera_calibration" 
+		type="cameracalibrator.py" 
+		args="--size 5x7 --square 0.05 image:=/sensors/camera/image_color" />
+	<node
+		name="rosbag_player"
+		pkg="rosbag"
+		type="play"
+		args="-r 0.5 /home/mano/data/2016-11-22-14-32-13_test.bag" />
+</launch>

@@ -1,0 +1,66 @@
+header: 
+  seq: 0
+  stamp: 
+    secs: 1540785502
+    nsecs: 759716419
+  frame_id: "velodyne"
+point: 
+  x: 2.94598913193
+  y: 0.877379179001
+  z: -0.26865875721
+---
+header: 
+  seq: 1
+  stamp: 
+    secs: 1540785562
+    nsecs: 632113977
+  frame_id: "velodyne"
+point: 
+  x: 1.54485213757
+  y: 0.155878782272
+  z: -0.0821104347706
+---
+header: 
+  seq: 2
+  stamp: 
+    secs: 1540785569
+    nsecs: 112108629
+  frame_id: "velodyne"
+point: 
+  x: 1.53850126266
+  y: -0.377347499132
+  z: -0.0830484330654
+---
+header: 
+  seq: 3
+  stamp: 
+    secs: 1540785574
+    nsecs: 604654342
+  frame_id: "velodyne"
+point: 
+  x: 1.57992088795
+  y: -0.371910750866
+  z: -0.37631419301
+---
+header: 
+  seq: 4
+  stamp: 
+    secs: 1540785580
+    nsecs: 498533735
+  frame_id: "velodyne"
+point: 
+  x: 1.59174573421
+  y: 0.167459487915
+  z: -0.372310191393
+---
+header: 
+  seq: 5
+  stamp: 
+    secs: 1540785586
+    nsecs: 316738381
+  frame_id: "velodyne"
+point: 
+  x: 1.72971570492
+  y: -0.175098121166
+  z: 0.152126044035
+---

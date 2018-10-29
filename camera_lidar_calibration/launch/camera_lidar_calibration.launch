@@ -1,0 +1,5 @@
+<launch>
+	<node name="rosbag_player" pkg="rosbag" type="play" args="/home/mano/data/2016-11-22-14-32-13_test_modified.bag" required="true"/>
+
+	<node name="camera_lidar_calibrator" pkg="camera_lidar_calibration" type="camera_lidar_calibration.py" args="-c /home/mano/data/camera_lidar_calibration_utils/correspondence_points.json -i /home/mano/data/camera_lidar_calibration_utils/image_to_get_2d_points_for_correspondence_1.jpg" required="true"/>
+</launch>

@@ -1,0 +1,15 @@
+<launch>
+	<node pkg="nodelet" type="nodelet" name="standalone_nodelet" args="manager"/>
+
+	<node name="rosbag_player" pkg="rosbag" type="play" args="/home/mano/data/2016-11-22-14-32-13_test_modified.bag" required="true"/>
+
+	<node name="rectifyer" pkg="nodelet" type="nodelet" args="load image_proc/rectify standalone_nodelet" required="true">
+		<remap from="image_mono" to="sensors/camera/image_color"/>
+		<remap from="camera_info" to="/sensors/camera/camera_info"/>
+		<remap from="image_rect" to="/sensors/camera/image_rect_color"/>
+	</node>
+
+	<node name="rqt_image_viewer" pkg="rqt_image_view" type="rqt_image_view" required="true"/>
+
+	<node name="rviz_visualizer" pkg="rviz" type="rviz" args="-f velodyne -d /home/mano/data/rviz_config.rviz"/>
+</launch>
