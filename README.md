@@ -175,3 +175,7 @@ After transforming the points in the cloud to the corresponding image points, th
 
 #### 3.2 Overlaying RGB image on point cloud data
 The transfromed points in the cloud correspond to some pixel location on the image. The RGB values at that pixel location are collected and for each point in the cloud a new point of type `pcl::PointXYZRGB` is created with x,y,z values set to be that of the original point and the r,g,b values assigned to be the collected RGB values. These newly formed pcl::PointXYZRGB points are converted to ROS message and published on the topic `/image_fused_pointcloud`
+
+### References
+1. [LiDAR-Camera Calibration using 3D-3D Point correspondences](https://arxiv.org/pdf/1705.09785.pdf)
+2. https://github.com/swyphcosmo/ros-camera-lidar-calibration
