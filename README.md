@@ -1,5 +1,6 @@
 # calibration_ros
-Camera Lidar calibration in ROS
+Camera Lidar calibration in ROS.
+The included cpp code and python2 scripts are built on Ubuntu 18.04 with ROS melodic
 
 ### 1. Camera calibration
 Given a camera it is important know its parameters (intrinsic - related to internal camera parameters including lense focal lengths in the x,y axes, pixel skew and the optical center; extrinsic - mapping 3D world coordinates on to the 2D image plane; distortion coefficients). More information on these parameters can be found [here](https://docs.opencv.org/2.4/modules/calib3d/doc/camera_calibration_and_3d_reconstruction.html)
@@ -72,10 +73,69 @@ This can be formulated as an optimization problem. A 3D point in world frame rep
 
 <img src="https://latex.codecogs.com/gif.latex?\begin{bmatrix}&space;u&space;&&space;v&space;&&space;1&space;\end{bmatrix}^{T}=K\left&space;[&space;R\mid&space;T&space;\right&space;]\begin{bmatrix}&space;x&space;&&space;y&space;&&space;z&space;&&space;1&space;\end{bmatrix}^{T}" title="\begin{bmatrix} u & v & 1 \end{bmatrix}^{T}=K\left [ R\mid T \right ]\begin{bmatrix} x & y & z & 1 \end{bmatrix}^{T}" />
 
-where `K` is a 3x3 camera intrinsic matrix, `[R|T]` is the 3x4 camera extrinsic matrix.
+where `K` is a 3x3 camera intrinsic matrix, `[R|T]` is the 3x4 camera extrinsic matrix (as obtained by the camera calibration process).
 
 And the corresponding point <img src="https://latex.codecogs.com/gif.latex?\begin{bmatrix}&space;X&space;&&space;Y&space;&&space;Z&space;&&space;1&space;\end{bmatrix}^{T}" title="\begin{bmatrix} X & Y & Z & 1 \end{bmatrix}^{T}" /> with homoegeneous representation in the lidar coordinate frame can be transformed to the world frame by multiplying it with the the 4x4 transformation matrix `P` as follows
 
 <img src="https://latex.codecogs.com/gif.latex?\begin{bmatrix}&space;x&space;&&space;y&space;&&space;z&space;&&space;1&space;\end{bmatrix}^{T}=P\begin{bmatrix}&space;X&space;&&space;Y&space;&&space;Z&space;&&space;1&space;\end{bmatrix}^{T}" title="\begin{bmatrix} x & y & z & 1 \end{bmatrix}^{T}=P\begin{bmatrix} X & Y & Z & 1 \end{bmatrix}^{T}" />
 
 Given a set of n 2D-3D correspondence points (2D points obtained from the image, 3D points obtained from the point cloud) our goal is to estimate transformation matrix `P` such that the `L2` error, between the actual 2D points and the estimated 2D points from the product equations described above, is minimized.
+For this project a set of 6 2D-3D correspondence points are collected manually by playing the .bag file and looking at the image frames and the lidar point cloud data in rviz. Launch file image_pointcloud_correspondence.launch shown below located at `camera_lidar_calibration/launch/image_pointcloud_correspondence.launch` is created to start the manual process of collecting the correspondece points
+```xml
+<launch>
+	<node pkg="nodelet" type="nodelet" name="standalone_nodelet" args="manager"/>
+
+	<node name="rosbag_player" pkg="rosbag" type="play" args="/home/mano/data/2016-11-22-14-32-13_test_modified.bag" required="true"/>
+
+	<node name="rectifyer" pkg="nodelet" type="nodelet" args="load image_proc/rectify standalone_nodelet" required="true">
+		<remap from="image_mono" to="sensors/camera/image_color"/>
+		<remap from="camera_info" to="/sensors/camera/camera_info"/>
+		<remap from="image_rect" to="/sensors/camera/image_rect_color"/>
+	</node>
+
+	<node name="rqt_image_viewer" pkg="rqt_image_view" type="rqt_image_view" required="true"/>
+
+	<node name="rviz_visualizer" pkg="rviz" type="rviz" args="-f velodyne -d /home/mano/data/rviz_config.rviz"/>
+</launch>
+```
+The launch file runs a node that plays the .bag file with the correct calibration information (that was created as described in section 1.3), an image_proc/rectify nodelet to publish the rectified images, an rqt_image_view node for displaying image frames and rviz displaying point cloud data. 
+When an approximate match in the image and the lidar point cloud structure is observed the playback of the bag file is paused and 6 3D points are gathered from rviz over the topic `/clicked_points` by the following command on a terminal window
+```
+$ rostopic echo /clicked_points > <path-to-txt-file>
+```
+After the 6 points are selected on the rviz, they get saved in the specified .txt file. After this the corresponding image is saved from the rqt_image_view window for collecting the 2D points. This is done by running the grab_2d_correspondence_points.py script located at `camera_lidar_calibration/scripts/grab_2d_correspondence_points.py` on the command line
+```
+$ python2 grab_2d_correspondence_points.py -i <path-to-image-saved-from-rqt-image-view-window>
+```
+Points from the image can be collected by mouse clicks. After the 6 appropriate points are selected, pressing the key 'c' would close the application and the selected points are displayed on the screen.
+The 3D points collected from rviz saved to a specified .txt file and the 2D points collected from image displayed on the terminal window are copied to a json file. The json file created for this project can be found at `utils/camera_lidar_calibration_utils/correspondence_points_2.json` and following are the contents of that file.
+```json
+{
+	"points": [ 
+		[ 2.946, 0.877, -0.269, 1.0 ], 
+		[ 1.545, 0.156, -0.082, 1.0 ], 
+		[ 1.539, -0.377, -0.083, 1.0 ], 
+		[ 1.580, -0.372, -0.376, 1.0 ], 
+		[ 1.592, 0.167, -0.372, 1.0 ], 
+		[ 1.730, -0.175, 0.152, 1.0 ] 
+	],
+	"uvs": [
+		[ 252, 404 ], 
+		[ 317, 323 ],
+		[ 488, 330 ],
+		[ 484, 436 ],
+		[ 308, 426 ],
+		[ 424, 286 ]
+	],
+	"initialTransform": [ 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 ],
+	"bounds": [
+		[ -4, 4 ], 
+		[ -4, 4 ], 
+		[ -4, 4 ], 
+		[ 0, 6.283 ],
+		[ 0, 6.283 ],
+		[ 0, 6.283 ]
+	]
+}
+```
+The `points` field in the above file has the homegeneous representation of 6 3D points, `uvs` field has the 2D points. The `initialTransform` is the initial state and `bounds` is the bounds on the state vetor fed as inputs to the optimization application.
