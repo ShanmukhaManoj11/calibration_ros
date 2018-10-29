@@ -1,6 +1,7 @@
 # calibration_ros
 Camera Lidar calibration in ROS.
-The included cpp code and python2 scripts are built on Ubuntu 18.04 with ROS melodic
+
+The included cpp code and python2 scripts are built and tested on Ubuntu 18.04 with ROS melodic
 
 ### 1. Camera calibration
 Given a camera it is important know its parameters (intrinsic - related to internal camera parameters including lense focal lengths in the x,y axes, pixel skew and the optical center; extrinsic - mapping 3D world coordinates on to the 2D image plane; distortion coefficients). More information on these parameters can be found [here](https://docs.opencv.org/2.4/modules/calib3d/doc/camera_calibration_and_3d_reconstruction.html)
@@ -167,3 +168,9 @@ The result obtained from the correspondence_point_2.json included in the project
 `[-0.269326290 -0.450351774 -0.219415375 1.62507734 4.87444952 0.0]`
 
 This can be pulished as a static_transform message that transforms point cloud points in the lidar frame into the world frame.
+
+### 3. Fusing image and point cloud data
+
+#### 3.1. Overlaying point cloud data on image
+
+#### 3.2 Overlaying RGB image on point cloud data
