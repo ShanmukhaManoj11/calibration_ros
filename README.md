@@ -69,8 +69,13 @@ Image rectification is the process of removing distortions in the image. ROS pro
 ### 2. Camera Lidar calibration
 Given a camera frame and lidar frame, the relative transformation between them is needed for aligning the data points in a single frame of reference for sensor fusion purposes. Given point cloud data, and assuming the camera coordinate frame is aligned with the world frame, we need to find the transformation matrix that takes the point in the lidar frame and transforms it to the world frame. 
 This can be formulated as an optimization problem. A 3D point in world frame represented in homogeneous coordinates as <img src="https://latex.codecogs.com/gif.latex?\begin{bmatrix}&space;x&space;&&space;y&space;&&space;z&space;&&space;1&space;\end{bmatrix}^{T}" title="\begin{bmatrix} x & y & z & 1 \end{bmatrix}^{T}" /> and the corresponding 2D point in image frame represented in homogeneous coordinates as <img src="https://latex.codecogs.com/gif.latex?\begin{bmatrix}&space;u&space;&&space;v&space;&&space;1&space;\end{bmatrix}^{T}" title="\begin{bmatrix} u & v & 1 \end{bmatrix}^{T}" /> are related as follows
+
 <img src="https://latex.codecogs.com/gif.latex?\begin{bmatrix}&space;u&space;&&space;v&space;&&space;1&space;\end{bmatrix}^{T}=K\left&space;[&space;R\mid&space;T&space;\right&space;]\begin{bmatrix}&space;x&space;&&space;y&space;&&space;z&space;&&space;1&space;\end{bmatrix}^{T}" title="\begin{bmatrix} u & v & 1 \end{bmatrix}^{T}=K\left [ R\mid T \right ]\begin{bmatrix} x & y & z & 1 \end{bmatrix}^{T}" />
-where `K` is a 3x3 camera intrinsic matrix, `[R|T]` is the 3x4 camera extrinsic matrix
+
+where `K` is a 3x3 camera intrinsic matrix, `[R|T]` is the 3x4 camera extrinsic matrix.
+
 And the corresponding point <img src="https://latex.codecogs.com/gif.latex?\begin{bmatrix}&space;X&space;&&space;Y&space;&&space;Z&space;&&space;1&space;\end{bmatrix}^{T}" title="\begin{bmatrix} X & Y & Z & 1 \end{bmatrix}^{T}" /> with homoegeneous representation in the lidar coordinate frame can be transformed to the world frame by multiplying it with the the 4x4 transformation matrix `P` as follows
+
 <img src="https://latex.codecogs.com/gif.latex?\begin{bmatrix}&space;x&space;&&space;y&space;&&space;z&space;&&space;1&space;\end{bmatrix}^{T}=P\begin{bmatrix}&space;X&space;&&space;Y&space;&&space;Z&space;&&space;1&space;\end{bmatrix}^{T}" title="\begin{bmatrix} x & y & z & 1 \end{bmatrix}^{T}=P\begin{bmatrix} X & Y & Z & 1 \end{bmatrix}^{T}" />
+
 Given a set of n 2D-3D correspondence points (2D points obtained from the image, 3D points obtained from the point cloud) our goal is to estimate transformation matrix `P` such that the `L2` error, between the actual 2D points and the estimated 2D points from the product equations described above, is minimized.
