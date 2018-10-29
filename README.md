@@ -68,3 +68,4 @@ Image rectification is the process of removing distortions in the image. ROS pro
 
 ### 2. Camera Lidar calibration
 Given a camera frame and lidar frame, the relative transformation between them is needed for aligning the data points in a single frame of reference for sensor fusion purposes. Given point cloud data, and assuming the camera coordinate frame is aligned with the world frame, we need to find the transformation that takes the point in the lidar frame to the world frame. 
+This can be formulated as an optimization problem. A point <img src="https://latex.codecogs.com/svg.latex?\Large&space;x=\frac{-b\pm\sqrt{b^2-4ac}}{2a}" title="\Large x=\frac{-b\pm\sqrt{b^2-4ac}}{2a}" />
