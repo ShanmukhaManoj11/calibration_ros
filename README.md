@@ -144,7 +144,9 @@ The `points` field in the above file has the homegeneous representation of 6 3D 
 
 #### 2.2. Estimating the lidar-to-world transformation matrix
 As explained above, one approach to estimating this transformation matrix is solving an optimization problem. Since tackling an optimization problem in python is a little simpler than that in c++ (thanks to scipy), a python script to estimate the transformation is created. It is located at `camera_lidar_calibration/scripts/camera_lidar_calibration.py`.
+
 Procedure to run the camera_lidar_calibration.py script
+
 **Terminal 1**
 ```
 $ roscore
@@ -157,7 +159,11 @@ $ rosbag play <path-to-bag-file-with-correct-camera-calibration-information>
 ```
 $ rosrun camera_lidar_calibration camera_lidar_calibration.py -c <path-to-correspondence-points-json-file> -i <path-to-image-saved-for-collecting-2D-correspondence-points>
 ```
+
 After the solution converge, on **Terminal 2** the result is displayed. The result is list of 6 floats representing the following respectively `[translation x, translation y, translation z, yaw, pitch, roll]`
+
 The result obtained from the correspondence_point_2.json included in the project is
+
 `[-0.269326290 -0.450351774 -0.219415375 1.62507734 4.87444952 0.0]`
+
 This can be pulished as a static_transform message that transforms point cloud points in the lidar frame into the world frame.
