@@ -163,14 +163,15 @@ $ rosrun camera_lidar_calibration camera_lidar_calibration.py -c <path-to-corres
 
 After the solution converge, on **Terminal 2** the result is displayed. The result is list of 6 floats representing the following respectively `[translation x, translation y, translation z, yaw, pitch, roll]`
 
-The result obtained from the correspondence_point_2.json included in the project is
+The final transform obtained from the correspondence_point_2.json included in the project is
 
 `[-0.269326290 -0.450351774 -0.219415375 1.62507734 4.87444952 0.0]`
 
-This can be pulished as a static_transform message that transforms point cloud points in the lidar frame into the world frame.
-
 ### 3. Fusing image and point cloud data
+The final transform achieved earlier can be expanded to from the transformation matrix `P` described in section 2. ROS has tf package that deals with the transform messages. This final transform will be pusblished as a static_transform from `frame_id:"velodyne"` (source frame/ lidar frame) to `frame_id:"world"` (target frame/ world frame). `TransformListener` in ROS can listen for this transform message and by using provided APIs like `transformPoint(...)` the points in frame_id:"velodyne" can be converted to frame_id:"world". These converted points in world frame are transformed to image points using `PinholeCameraModel::project3dToPixel(...)`. This transformation of point cloud data is implemented in camera_lidar_overlay.cpp located at `camera_lidar_calibration/src/camera_lidar_overlay.cpp`
 
 #### 3.1. Overlaying point cloud data on image
+After transforming the points in the cloud to the corresponding image points, they can be added on to the image using OpenCV drawing functions. The overlayed image is published by the camera_lidar_overlay node on the topic `/sensors/camera/overlayed_lidar_image`
 
 #### 3.2 Overlaying RGB image on point cloud data
+The transfromed points in the cloud correspond to some pixel location on the image. The RGB values at that pixel location are collected and for each point in the cloud a new point of type `pcl::PointXYZRGB` is created with x,y,z values set to be that of the original point and the r,g,b values assigned to be the collected RGB values. These newly formed pcl::PointXYZRGB points are converted to ROS message and published on the topic `/image_fused_pointcloud`
