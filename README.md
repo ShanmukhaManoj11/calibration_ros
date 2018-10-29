@@ -68,7 +68,7 @@ The second approach is to modify the .bag file itself and create a new one with 
 Image rectification is the process of removing distortions in the image. ROS provide [image_proc](http://wiki.ros.org/image_proc) package that does this processing.
 
 ### 2. Camera Lidar calibration
-Given a camera frame and lidar frame, the relative transformation between them is needed for aligning the data points in a single frame of reference for sensor fusion purposes. Given point cloud data, and assuming the camera coordinate frame is aligned with the world frame, we need to find the transformation matrix that takes the point in the lidar frame and transforms it to the world frame. 
+Given a camera frame and lidar frame, the relative transformation between them is needed for aligning the data points in a single frame of reference for sensor fusion purposes. Given point cloud data, and assuming the extrinsic camera matrix - which describes the rotation and translation of the camera coordinate frame with the world coordinate frame is known, we need to find the transformation matrix that takes the point in the lidar frame and transforms it to the world frame. 
 This can be formulated as an optimization problem. A 3D point in world frame represented in homogeneous coordinates as <img src="https://latex.codecogs.com/gif.latex?\begin{bmatrix}&space;x&space;&&space;y&space;&&space;z&space;&&space;1&space;\end{bmatrix}^{T}" title="\begin{bmatrix} x & y & z & 1 \end{bmatrix}^{T}" /> and the corresponding 2D point in image frame represented in homogeneous coordinates as <img src="https://latex.codecogs.com/gif.latex?\begin{bmatrix}&space;u&space;&&space;v&space;&&space;1&space;\end{bmatrix}^{T}" title="\begin{bmatrix} u & v & 1 \end{bmatrix}^{T}" /> are related as follows
 
 <img src="https://latex.codecogs.com/gif.latex?\begin{bmatrix}&space;u&space;&&space;v&space;&&space;1&space;\end{bmatrix}^{T}=K\left&space;[&space;R\mid&space;T&space;\right&space;]\begin{bmatrix}&space;x&space;&&space;y&space;&&space;z&space;&&space;1&space;\end{bmatrix}^{T}" title="\begin{bmatrix} u & v & 1 \end{bmatrix}^{T}=K\left [ R\mid T \right ]\begin{bmatrix} x & y & z & 1 \end{bmatrix}^{T}" />
@@ -80,6 +80,8 @@ And the corresponding point <img src="https://latex.codecogs.com/gif.latex?\begi
 <img src="https://latex.codecogs.com/gif.latex?\begin{bmatrix}&space;x&space;&&space;y&space;&&space;z&space;&&space;1&space;\end{bmatrix}^{T}=P\begin{bmatrix}&space;X&space;&&space;Y&space;&&space;Z&space;&&space;1&space;\end{bmatrix}^{T}" title="\begin{bmatrix} x & y & z & 1 \end{bmatrix}^{T}=P\begin{bmatrix} X & Y & Z & 1 \end{bmatrix}^{T}" />
 
 Given a set of n 2D-3D correspondence points (2D points obtained from the image, 3D points obtained from the point cloud) our goal is to estimate transformation matrix `P` such that the `L2` error, between the actual 2D points and the estimated 2D points from the product equations described above, is minimized.
+
+#### 2.1. Collecting 2D-3D correspondence points manually
 For this project a set of 6 2D-3D correspondence points are collected manually by playing the .bag file and looking at the image frames and the lidar point cloud data in rviz. Launch file image_pointcloud_correspondence.launch shown below located at `camera_lidar_calibration/launch/image_pointcloud_correspondence.launch` is created to start the manual process of collecting the correspondece points
 ```xml
 <launch>
@@ -139,3 +141,23 @@ The 3D points collected from rviz saved to a specified .txt file and the 2D poin
 }
 ```
 The `points` field in the above file has the homegeneous representation of 6 3D points, `uvs` field has the 2D points. The `initialTransform` is the initial state and `bounds` is the bounds on the state vetor fed as inputs to the optimization application.
+
+#### 2.2. Estimating the lidar-to-world transformation matrix
+As explained above, one approach to estimating this transformation matrix is solving an optimization problem. Since tackling an optimization problem in python is a little simpler than that in c++ (thanks to scipy), a python script to estimate the transformation is created. It is located at `camera_lidar_calibration/scripts/camera_lidar_calibration.py`.
+Procedure to run the camera_lidar_calibration.py script
+**Terminal 1**
+```
+$ roscore
+```
+**Terminal 2**
+```
+$ rosbag play <path-to-bag-file-with-correct-camera-calibration-information>
+```
+**Terminal 3**
+```
+$ rosrun camera_lidar_calibration camera_lidar_calibration.py -c <path-to-correspondence-points-json-file> -i <path-to-image-saved-for-collecting-2D-correspondence-points>
+```
+After the solution converge, on **Terminal 2** the result is displayed. The result is list of 6 floats representing the following respectively `[translation x, translation y, translation z, yaw, pitch, roll]`
+The result obtained from the correspondence_point_2.json included in the project is
+`[-0.269326290 -0.450351774 -0.219415375 1.62507734 4.87444952 0.0]`
+This can be pulished as a static_transform message that transforms point cloud points in the lidar frame into the world frame.
