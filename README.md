@@ -66,7 +66,24 @@ This approach would require this node to be running along with the rosbag player
 The second approach is to modify the .bag file itself and create a new one with the camera_info topic contents modified. This approach is implemented in the modify_camera_info_content.py script found at `camera_calibration1/scripts/modify_camera_info_content.py`. Now this script only needs to be run once and this would create a new .bag file that can be played back with the correct calibration information to be used by other applications. 
 
 #### 1.4 Rectifying images
-Image rectification is the process of removing distortions in the image. ROS provide [image_proc](http://wiki.ros.org/image_proc) package that does this processing.
+Image rectification is the process of removing distortions in the image. ROS provides [image_proc](http://wiki.ros.org/image_proc) package that does this processing. The following launch file located at `camera_calibration1/launch/rectified_image_export.launch` is created to play the modified .bag file with correct calibration parameters, rectify the image frames with image_proc and save the rectified frames as video.
+```xml
+<launch>
+	<node pkg="nodelet" type="nodelet" name="standalone_nodelet" args="manager"/>
+
+	<node name="rosbag_player" pkg="rosbag" type="play" args="/home/mano/data/2016-11-22-14-32-13_test_modified.bag" required="true"/>
+
+	<node name="rectifyer" pkg="nodelet" type="nodelet" args="load image_proc/rectify standalone_nodelet" required="true">
+		<remap from="image_mono" to="sensors/camera/image_color"/>
+		<remap from="camera_info" to="/sensors/camera/camera_info"/>
+		<remap from="image_rect" to="/sensors/camera/image_rect_color"/>
+	</node>
+
+	<node name="rect_video_recorder" pkg="image_view" type="video_recorder" respawn="false">
+		<remap from="image" to="/sensors/camera/image_rect_color"/>
+	</node>
+</launch>
+```
 
 ### 2. Camera Lidar calibration
 Given a camera frame and lidar frame, the relative transformation between them is needed for aligning the data points in a single frame of reference for sensor fusion purposes. Given point cloud data, and assuming the extrinsic camera matrix - which describes the rotation and translation of the camera coordinate frame with the world coordinate frame is known, we need to find the transformation matrix that takes the point in the lidar frame and transforms it to the world frame. 
