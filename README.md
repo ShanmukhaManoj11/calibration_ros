@@ -239,6 +239,11 @@ The transfromed points in the cloud correspond to some pixel location on the ima
 **Sample image overlayed point cloud**
 ![alt text](https://github.com/ShanmukhaManoj11/calibration_ros/blob/master/readme_utils/image_on_point_cloud.jpg)
 
+### Results
+1. [image rectification with ROS image_proc](https://youtu.be/yC97zbxJZFU)
+2. [point cloud data overlayed on image frames](https://youtu.be/spoKaul9xHE)
+3. [RGB image overlayed on point cloud data](https://youtu.be/0MZzsvB2uBQ)
+
 ### References
 1. [LiDAR-Camera Calibration using 3D-3D Point correspondences](https://arxiv.org/pdf/1705.09785.pdf)
 2. https://github.com/swyphcosmo/ros-camera-lidar-calibration
