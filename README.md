@@ -192,7 +192,36 @@ The final transform obtained from the correspondence_point_2.json included in th
 `[-0.269326290 -0.450351774 -0.219415375 1.62507734 4.87444952 0.0]`
 
 ### 3. Fusing image and point cloud data
-The final transform achieved earlier can be expanded to from the transformation matrix `P` described in section 2. ROS has tf package that deals with the transform messages. This final transform will be pusblished as a static_transform from `frame_id:"velodyne"` (source frame/ lidar frame) to `frame_id:"world"` (target frame/ world frame). `TransformListener` in ROS can listen for this transform message and by using provided APIs like `transformPoint(...)` the points in frame_id:"velodyne" can be converted to frame_id:"world". These converted points in world frame are transformed to image points using `PinholeCameraModel::project3dToPixel(...)`. This transformation of point cloud data is implemented in camera_lidar_overlay.cpp located at `camera_lidar_calibration/src/camera_lidar_overlay.cpp`
+The final transform achieved earlier can be expanded to from the transformation matrix `P` described in section 2. ROS has tf package that deals with the transform messages. This final transform will be pusblished as a static_transform from `frame_id:"velodyne"` (source frame/ lidar frame) to `frame_id:"world"` (target frame/ world frame). `TransformListener` in ROS can listen for this transform message and by using provided APIs like `transformPoint(...)` the points in frame_id:"velodyne" can be converted to frame_id:"world". These converted points in world frame are transformed to image points using `PinholeCameraModel::project3dToPixel(...)`. This transformation of point cloud data is implemented in camera_lidar_overlay.cpp located at `camera_lidar_calibration/src/camera_lidar_overlay.cpp`.
+The following launch file located at `camera_lidar_calibration/launch/image_pointcloud_overlay.launch` is created to run 
+1. node that playback the bag file with correct camera calibration information,
+2. image_proc/rectifier nodelet for rectifying the images,
+3. static_transform_publisher publishing the world-to-lidar transformation parameters from the previous section,
+4. image_view video_recorder node recording the point-cloud overlayed image frames into a video, and
+5. rviz to visualize image overlayed point-cloud data 
+```xml
+<launch>
+	<node pkg="nodelet" type="nodelet" name="standalone_nodelet" args="manager"/>
+
+	<node name="rosbag_player" pkg="rosbag" type="play" args="/home/mano/data/2016-11-22-14-32-13_test_modified.bag" required="true"/>
+
+	<node name="rectifyer" pkg="nodelet" type="nodelet" args="load image_proc/rectify standalone_nodelet" required="true">
+		<remap from="image_mono" to="sensors/camera/image_color"/>
+		<remap from="camera_info" to="/sensors/camera/camera_info"/>
+		<remap from="image_rect" to="/sensors/camera/image_rect_color"/>
+	</node>
+
+	<node name="static_transform_publisher" pkg="tf" type="static_transform_publisher" args="-0.269326290 -0.450351774 -0.219415375 1.62507734 4.87444952 0.0 world velodyne 100" required="true"/>
+
+	<node name="image_pointcloud_overlay" pkg="camera_lidar_calibration" type="camera_lidar_overlay"/>
+
+	<node name="video_recorder" pkg="image_view" type="video_recorder" respawn="false">
+		<remap from="image" to="/sensors/camera/overlayed_lidar_image"/>
+	</node>
+
+	<node name="rviz_visualizer" pkg="rviz" type="rviz" args="-f velodyne -d /home/mano/data/lidar_image_overlay.rviz"/>
+</launch>
+```
 
 #### 3.1. Overlaying point cloud data on image
 After transforming the points in the cloud to the corresponding image points, they can be added on to the image using OpenCV drawing functions. The overlayed image is published by the camera_lidar_overlay node on the topic `/sensors/camera/overlayed_lidar_image`
