@@ -64,6 +64,7 @@ projection_matrix:
 #### 1.3. Modifying the camera_info content in the existing bag file with the generated calibration information
 Initial approach was to create a camera_info_publisher.cpp which acts as a node that subcribers to the `/sensors/camera/camera_info` topic and replaces the content of the received `sensor_msgs::CameraInfo` message with the contents in the ost.yaml file. This implementation can be found at `camera_calibration1/src/camera_info_publisher.cpp`
 This approach would require this node to be running along with the rosbag player whenever the calibration info is needed by other applications.
+
 The second approach is to modify the .bag file itself and create a new one with the camera_info topic contents modified. This approach is implemented in the modify_camera_info_content.py script found at `camera_calibration1/scripts/modify_camera_info_content.py`. Now this script only needs to be run once and this would create a new .bag file that can be played back with the correct calibration information to be used by other applications. 
 
 #### 1.4 Rectifying images
@@ -89,7 +90,7 @@ sample distorted image             |  rectified image
 :---------------------------------:|:---------------------------------:
 ![alt text](https://github.com/ShanmukhaManoj11/calibration_ros/blob/master/readme_utils/distorted_image.jpg) | ![alt text](https://github.com/ShanmukhaManoj11/calibration_ros/blob/master/readme_utils/rectified_image.jpg) 
 
-**Node graph structure for the image rectification process**
+**Node graph for the image rectification process**
 ![alt text](https://github.com/ShanmukhaManoj11/calibration_ros/blob/master/readme_utils/node_graph_image_rectification.jpg)
 
 ### 2. Camera Lidar calibration
@@ -168,7 +169,7 @@ The 3D points collected from rviz saved to a specified .txt file and the 2D poin
 The `points` field in the above file has the homegeneous representation of 6 3D points, `uvs` field has the 2D points. The `initialTransform` is the initial state and `bounds` is the bounds on the state vetor fed as inputs to the optimization application.
 
 #### 2.2. Estimating the lidar-to-world transformation matrix
-As explained above, one approach to estimating this transformation matrix is solving an optimization problem. Since tackling an optimization problem in python is a little simpler than that in c++ (thanks to scipy), a python script to estimate the transformation is created. It is located at `camera_lidar_calibration/scripts/camera_lidar_calibration.py`.
+As explained above, one approach to estimating this transformation matrix is solving an optimization problem. Since tackling an **optimization** problem in python is a little simpler than that in c++ (thanks to scipy), a python script to estimate the transformation is created. It is located at `camera_lidar_calibration/scripts/camera_lidar_calibration.py`.
 
 Procedure to run the camera_lidar_calibration.py script
 
