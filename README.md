@@ -193,6 +193,7 @@ The final transform obtained from the correspondence_point_2.json included in th
 
 ### 3. Fusing image and point cloud data
 The final transform achieved earlier can be expanded to from the transformation matrix `P` described in section 2. ROS has tf package that deals with the transform messages. This final transform will be pusblished as a static_transform from `frame_id:"velodyne"` (source frame/ lidar frame) to `frame_id:"world"` (target frame/ world frame). `TransformListener` in ROS can listen for this transform message and by using provided APIs like `transformPoint(...)` the points in frame_id:"velodyne" can be converted to frame_id:"world". These converted points in world frame are transformed to image points using `PinholeCameraModel::project3dToPixel(...)`. This transformation of point cloud data is implemented in camera_lidar_overlay.cpp located at `camera_lidar_calibration/src/camera_lidar_overlay.cpp`.
+
 The following launch file located at `camera_lidar_calibration/launch/image_pointcloud_overlay.launch` is created to run 
 1. node that playback the bag file with correct camera calibration information,
 2. image_proc/rectifier nodelet for rectifying the images,
@@ -222,12 +223,20 @@ The following launch file located at `camera_lidar_calibration/launch/image_poin
 	<node name="rviz_visualizer" pkg="rviz" type="rviz" args="-f velodyne -d /home/mano/data/lidar_image_overlay.rviz"/>
 </launch>
 ```
+**Node graph for image-pointcloud fusion**
+![alt text](https://github.com/ShanmukhaManoj11/calibration_ros/blob/master/readme_utils/node_graph_image_lidar_overlay.jpg)
 
 #### 3.1. Overlaying point cloud data on image
 After transforming the points in the cloud to the corresponding image points, they can be added on to the image using OpenCV drawing functions. The overlayed image is published by the camera_lidar_overlay node on the topic `/sensors/camera/overlayed_lidar_image`
 
+**Sample point cloud overlayed image**
+![alt text](https://github.com/ShanmukhaManoj11/calibration_ros/blob/master/readme_utils/point_cloud_on_image.jpg)
+
 #### 3.2 Overlaying RGB image on point cloud data
 The transfromed points in the cloud correspond to some pixel location on the image. The RGB values at that pixel location are collected and for each point in the cloud a new point of type `pcl::PointXYZRGB` is created with x,y,z values set to be that of the original point and the r,g,b values assigned to be the collected RGB values. These newly formed pcl::PointXYZRGB points are converted to ROS message and published on the topic `/image_fused_pointcloud`
+
+**Sample image overlayed point cloud**
+![alt text](https://github.com/ShanmukhaManoj11/calibration_ros/blob/master/readme_utils/image_on_point_cloud.jpg)
 
 ### References
 1. [LiDAR-Camera Calibration using 3D-3D Point correspondences](https://arxiv.org/pdf/1705.09785.pdf)
