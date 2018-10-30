@@ -16,4 +16,6 @@
 	<node name="video_recorder" pkg="image_view" type="video_recorder" respawn="false">
 		<remap from="image" to="/sensors/camera/overlayed_lidar_image"/>
 	</node>
+
+	<node name="rviz_visualizer" pkg="rviz" type="rviz" args="-f velodyne -d /home/mano/data/lidar_image_overlay.rviz"/>
 </launch>
