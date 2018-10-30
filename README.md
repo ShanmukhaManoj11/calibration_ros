@@ -11,6 +11,7 @@ There are several techniques to estimate these parameters, in this project a che
 ```bash
 $ rosbag info <path-to-bag-file>
 ```
+![alt text](https://github.com/ShanmukhaManoj11/calibration_ros/blob/master/readme_utils/rosbag_info_output.jpg)
 The provided .bag file publishes 
 1. raw images of message type `sensor_msgs::Image` on the topic `/sensors/camera/image_color`
 2. calibration information of message type `sensor_msgs::CameraInfo` on the topic `/sensors/camera/camera_info`
@@ -66,7 +67,7 @@ This approach would require this node to be running along with the rosbag player
 The second approach is to modify the .bag file itself and create a new one with the camera_info topic contents modified. This approach is implemented in the modify_camera_info_content.py script found at `camera_calibration1/scripts/modify_camera_info_content.py`. Now this script only needs to be run once and this would create a new .bag file that can be played back with the correct calibration information to be used by other applications. 
 
 #### 1.4 Rectifying images
-Image rectification is the process of removing distortions in the image. ROS provides [image_proc](http://wiki.ros.org/image_proc) package that does this processing. The following launch file located at `camera_calibration1/launch/rectified_image_export.launch` is created to play the modified .bag file with correct calibration parameters, rectify the image frames with image_proc and save the rectified frames as video.
+Image rectification is the process of removing distortions in the image. ROS provides [image_proc](http://wiki.ros.org/image_proc) package that does this processing. The following launch file located at `camera_calibration1/launch/rectified_image_export.launch` is created to play the modified .bag file with correct calibration parameters, rectify the image frames with image_proc/rectify nodelet and save the rectified frames as video.
 ```xml
 <launch>
 	<node pkg="nodelet" type="nodelet" name="standalone_nodelet" args="manager"/>
@@ -84,6 +85,12 @@ Image rectification is the process of removing distortions in the image. ROS pro
 	</node>
 </launch>
 ```
+sample distorted image             |  rectified image
+:---------------------------------:|:---------------------------------:
+![alt text](https://github.com/ShanmukhaManoj11/calibration_ros/blob/master/readme_utils/distorted_image.jpg) | ![alt text](https://github.com/ShanmukhaManoj11/calibration_ros/blob/master/readme_utils/rectified_image.jpg) 
+
+**Node graph structure for the image rectification process**
+![alt text](https://github.com/ShanmukhaManoj11/calibration_ros/blob/master/readme_utils/node_graph_image_rectification.jpg)
 
 ### 2. Camera Lidar calibration
 Given a camera frame and lidar frame, the relative transformation between them is needed for aligning the data points in a single frame of reference for sensor fusion purposes. Given point cloud data, and assuming the extrinsic camera matrix - which describes the rotation and translation of the camera coordinate frame with the world coordinate frame is known, we need to find the transformation matrix that takes the point in the lidar frame and transforms it to the world frame. 
